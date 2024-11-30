@@ -42,7 +42,7 @@ jobs:
           go build -o dist/borgbackuptransactions_exporter-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: borgbackuptransactions_exporter-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/borgbackuptransactions_exporter-${{ matrix.goos }}-${{ matrix.goarch }}
@@ -54,9 +54,11 @@ jobs:
 
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ./dist
+          pattern: borgbackuptransactions.*
+          merge-multiple: true
 
       - name: Create Release
         uses: actions/create-release@v1
@@ -68,3 +70,4 @@ jobs:
           release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
+          artifacts: dist/*
