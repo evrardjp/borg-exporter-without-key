@@ -7,8 +7,8 @@ This is appropriate for monitoring on a server in which you do not want to store
 You should add other monitoring tools to check consistency with other exporters.
 
 ## Features
-- Metrics for the last transaction timestamp and number for each repository.
-- Configurable via a JSON file.
+- Metrics for the last transaction number for each repository.
+- Configurable via a JSON file for multiple repos
 
 ## Usage
 
@@ -23,11 +23,10 @@ You should add other monitoring tools to check consistency with other exporters.
     ```
 2. Run the exporter:
     ```bash
-    ./borgbackuptransactions_exporter --config=config.json
+    ./borgbackuptransactions_exporter -config=config.json
     ```
 
 ### Metrics exposed
-- `borgbackup_last_transaction_timestamp`
 - `borgbackup_last_transaction_number`
 
 ### How to scrape

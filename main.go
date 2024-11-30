@@ -37,13 +37,6 @@ const (
 )
 
 var (
-	lastTransactionTimestamp = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "borgbackup_last_transaction_timestamp",
-			Help: "Unix timestamp of the last transaction in the BorgBackup repository",
-		},
-		[]string{"repo"},
-	)
 	lastTransactionNumber = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "borgbackup_last_transaction_number",
@@ -54,7 +47,6 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(lastTransactionTimestamp)
 	prometheus.MustRegister(lastTransactionNumber)
 }
 
@@ -187,33 +179,26 @@ func updateRepoMetrics(repo string) {
   // instead of deferring as usual, close as soon as the 
   file.Close()
 
-	transactionNumber, timestamp, err := parseTransactionLine(lastLine)
+	transactionNumber, err := parseTransactionLine(lastLine)
 	if err != nil {
 		log.Printf("Failed to parse transactions file for repo %s: %v", repo, err)
 		return
 	}
 
-	lastTransactionTimestamp.WithLabelValues(repo).Set(float64(timestamp))
 	lastTransactionNumber.WithLabelValues(repo).Set(float64(transactionNumber))
 }
 
-func parseTransactionLine(line string) (int, int64, error) {
+func parseTransactionLine(line string) (int, error) {
 	parts := strings.Split(line, ",")
 	if len(parts) < 2 {
-		return 0, 0, fmt.Errorf("invalid line format: %s", line)
+		return 0, fmt.Errorf("invalid line format: %s", line)
 	}
 
 	numberStr := strings.TrimPrefix(parts[0], "transaction ")
 	transactionNumber, err := strconv.Atoi(strings.TrimSpace(numberStr))
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to parse transaction number: %v", err)
+		return 0, fmt.Errorf("failed to parse transaction number: %v", err)
 	}
 
-	timeStr := strings.TrimSpace(strings.Replace(parts[1], "UTC time", "", -1))
-	t, err := time.Parse("2006-01-02T15:04:05.000000", timeStr)
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to parse UTC time: %v", err)
-	}
-
-	return transactionNumber, t.Unix(), nil
+	return transactionNumber, nil
 }
